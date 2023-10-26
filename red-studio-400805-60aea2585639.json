@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "red-studio-400805",
+  "private_key_id": "60aea25856398ac6d0e4ec1e090c95aab55d65fe",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCwkLgGsH0TNnhO\nVSRATTAEZ5wqRbSX3E9bu/p0Dl3r2TOSx7O0t2/ue89Zqt/DPC99dOKpOWV7d1BO\nR6L6ZhMaEe2Db/5gwQz714z5WNa2HWw/KTICooMIOYcmMWmLYWqlZSoBklKRR4MQ\n4u5cmRjms7tBPpp9lICGfvqLcDqoCGttncLcs/JR0k4rRvk0PYPDTWDLqu6qknYv\nZ5v71SpdG9bvzgrYHGC/ECyocyKggFz2g0+Yn7WYUV7losuyIHLuVTIbt9Yl8TRY\nDOSWY7vzmxLFv67IQ0igrjWvoqxWIWmLxS801ZLA9a3xM9zq1LZyRnJ0BIac+J8p\nMwXM78nTAgMBAAECggEAAPhkl1oyWKW/kozsRzURcqGZ8yDuDLDWegTKavJ1qHVN\nvvCI/XGfs9P7oTb1njqqr/Jh0YovWsNoBlcmicl/8f8CZ82JeVyC0U/weJmHrQ5l\nnYKmqE+0eoDYqHL1S4IVltmNUqyokcMPL+8s9SyfhLhRaN8Edp5340M59usm4uiL\n+PagS/TJhtEN1pqwDkdy4AZGbWFAKPWPnbWtD3lV82olVre1wkm5gIlz/eqmF3MI\nf8kX18dkVBBpd30t9Gt97jRxwvimOKIRPHEYJmCYxToXQlBGKb8J0ITvywnryouS\n31U4X9y5rSFVQC6sJ7MnUPc+T9xtgr2xbuY3E7LfyQKBgQDiF8dtaRqXWnyguIiN\ncjRuUh5b57SOcQLzfLvbSrhjxbECuww5GpQjai/ryk94Zj/gBG5BU4CRXVGUP+lg\n+BVpIz2m1yc4B4pYbQRdVCntReVuWHIF6l70224OTZAZ0tU5CkSTIFlzd34GIShp\n5FnX3xWgeMrKLbO2dOQUdL6hPwKBgQDH68d6YoDGO2HMCPJ7hkJjLewCU9A5tvfT\nP2dZ46YI7vRGJpxmwfFbaG0e86NEzUeTGScLM/0BE36OyZkpRDgMcb1u/nkAHbUP\nhxLr6wiHDsVdtccRsUInLNWQrvZyZIUDu3qkSIN3GaZAk1p1x1vckUE0aHgMGe5J\nXNMUM3BebQKBgQCHIXM+f203PQvz+5cSA0o3Dbm7cHdIE1+SK+ETpksixsuPOECL\n+MjFiffuU9K/wU04FS3YuZHEUCQsGS7hmCUj275Dc6CrKkaTp0TOizkr6XTBSPeN\ndZEfg+75eX5BEPQDzZFC5jjQfIDEJRlEgQj5rwn8CXYa9MnOqXqQh15QfQKBgQDG\nHXgLZuv4BcavfDpXgL/vKwXTdJ1HZHMIq69Om9LgzXPSxNZ+2jjE/aINZyFnwAnq\n0qUna/iQBXKIK22VQF5OrrQr9w+PtuDDp3ZvxfUoadHaQJYqiT9mNP7apxfgWo6a\nGUK65IUrFIb1PVEKoGn/FQ7J0bENRPEnUE54mVUErQKBgHnBJnme/tzoJpZ2aK1U\nOvrS6waCZJDUSFCguMMX1iSq2UuaNa1H26CLtxZoQpelA3Z7w0xFnpmIQ/Z/ADy2\nAbEZtp88MDJ9wHbisTwUaDsy59sZFouHXBBveu17UwKBkhy/LtaLAbXnGLYY1ByZ\neZvYicTHehYLMr+mWPzANboK\n-----END PRIVATE KEY-----\n",
+  "client_email": "monika@red-studio-400805.iam.gserviceaccount.com",
+  "client_id": "112923396537465477512",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/monika%40red-studio-400805.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
