@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trace Matrix Generation</title>
+</head>
+<body>
+    <h1>Trace Matrix Generation</h1>
+    <form action="/post" method="POST" id="data-form">
+        <div>
+            <!-- URL Textbox -->
+            <label for="user_input">{{user_input}}</label>
+            <input type="text" id="user_input" name="user_input" required>
+        </div>
+
+        <div>
+            <!-- Radio Buttons for "URS" and "RA" -->
+            <p>Select an option:</p>
+            <label for="urs">URS</label>
+            <input type="radio" id="urs" name="Category" value="URS" required>
+            <label for="ra">RA</label>
+            <input type="radio" id="ra" name="Category" value="RA" required>
+        </div>
+
+        <div>
+            <!-- Checkbox for "Allow access" -->
+            <label for="allow_access">Allow access</label>
+            <input type="checkbox" id="allow_access" name="allow_access" value="yes">
+        </div>
+
+        <div>
+            <button type="submit" id="submit-button">Submit</button>
+        </div>
+    </form>
+
+    
+</body>
+</html>

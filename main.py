@@ -1,4 +1,3 @@
-from fastapi import FastAPI, Form, Request
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 import numpy as np
@@ -12,23 +11,28 @@ import gspread
 from google.auth import default
 from collections import defaultdict
 from gspread_formatting import *
+from fastapi import Request, FastAPI, UploadFile, File, Form
+from fastapi.responses import HTMLResponse
+from fastapi.templating import Jinja2Templates
 
+
+templates = Jinja2Templates(directory="templates")
 app = FastAPI()
 
-# adding cors urls
-origins=[
-    'http://localhost',
-    'http://localhost:3000',
-    'https://*.gitpod.io/',
-]
- #add middleware
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    # allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"]
-)
+# # adding cors urls
+# origins=[
+#     'http://localhost',
+#     'http://localhost:3000',
+#     'https://*.gitpod.io/',
+# ]
+#  #add middleware
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],
+#     # allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"]
+# )
 # Create a sample dataframe
 df = pd.DataFrame(columns=['Enter the url', 'Category', 'Grant Access'])
 def formatting(worksheet):
@@ -93,6 +97,35 @@ def formatting(worksheet):
     
 
     print("Successfully made changes in the Google sheet.")
+      #<========================LoD (QualificationDocuments)===============================>
+def lod_create(gc,sht1):   
+        cols = "QualificationStep,QualificationDocument,Company GroningerID".split(',')
+
+        FILE_ID_2 = '1lTuFfxbYnXgZMWXoJMFr2UcIr0cB16XOIcrMoXZ6jFw'
+        sht2 = gc.open_by_key(FILE_ID_2)
+
+        worksheet = sht2.worksheet('LoD (QualificationDocuments)')
+
+       
+        df_step4 = pd.DataFrame(worksheet.get_all_values()[0])
+
+        print(df_step4.head())
+        data = worksheet.get_all_values()
+        data = [row[:3] for row in data]
+        df_step4 = pd.DataFrame(data, columns=cols)
+        # for i in range(len(df_step4)):
+        #     new_row = [df_step4.iloc[i]['QualificationStep'],df_step4.iloc[i]['QualificationDocument'],df_step4.iloc[i]['Company GroningerID']]
+        #     new_df_step4.loc[len(new_df_step4)] = new_row
+
+        try:
+            NEW_SHEET_NAME = 'LoD (QualificationDocuments)'
+            worksheet = sht1.add_worksheet(title=NEW_SHEET_NAME, rows=200, cols=26)
+        except gspread.exceptions.APIError as e:
+            print(e)
+
+        worksheet = sht1.worksheet('LoD (QualificationDocuments)')
+        worksheet.update(df_step4.values.tolist())
+        formatting(worksheet)
 def one_master_sheet(gc,sht1):
 
     worksheet_list = sht1.worksheets()
@@ -365,37 +398,10 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
         # Update header and append data
         worksheet_step4.update([new_df_step4.columns.values.tolist()] + new_df_step4.values.tolist())
         formatting(worksheet_step4)
+        lod_create(gc,sht1)
+
         print(f"Trace Matrix successfully generated. [Click here to view]({user_input})")
-        #<========================LoD (QualificationDocuments)===============================>
         
-        cols = "QualificationStep,QualificationDocument,Company GroningerID".split(',')
-
-        FILE_ID_2 = '1lTuFfxbYnXgZMWXoJMFr2UcIr0cB16XOIcrMoXZ6jFw'
-        sht2 = gc.open_by_key(FILE_ID_2)
-
-        worksheet = sht2.worksheet('LoD (QualificationDocuments)')
-
-       
-        df_step4 = pd.DataFrame(worksheet.get_all_values()[0])
-
-        print(df_step4.head())
-        data = worksheet.get_all_values()
-        data = [row[:3] for row in data]
-        df_step4 = pd.DataFrame(data, columns=cols)
-        # for i in range(len(df_step4)):
-        #     new_row = [df_step4.iloc[i]['QualificationStep'],df_step4.iloc[i]['QualificationDocument'],df_step4.iloc[i]['Company GroningerID']]
-        #     new_df_step4.loc[len(new_df_step4)] = new_row
-
-        try:
-            NEW_SHEET_NAME = 'LoD (QualificationDocuments)'
-            worksheet = sht1.add_worksheet(title=NEW_SHEET_NAME, rows=200, cols=26)
-        except gspread.exceptions.APIError as e:
-            print(e)
-
-        worksheet = sht1.worksheet('LoD (QualificationDocuments)')
-        worksheet.update(df_step4.values.tolist())
-        formatting(worksheet)
-
     else :
         print(f"Check the sheet for correct Formate and check if the spreadsheet does not have only one 'Master' sheet [here]({user_input})")
 
@@ -636,48 +642,18 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         worksheet = sht1.worksheet('Step2 TM')
         worksheet.update([new_df_step3.columns.values.tolist()] + new_df_step3.values.tolist())
         formatting(worksheet)
-
-    
-        #<========================LoD (QualificationDocuments)===============================>
-        
-        cols = "QualificationStep,QualificationDocument,Company GroningerID".split(',')
-
-        FILE_ID_2 = '1lTuFfxbYnXgZMWXoJMFr2UcIr0cB16XOIcrMoXZ6jFw'
-        sht2 = gc.open_by_key(FILE_ID_2)
-
-        worksheet = sht2.worksheet('LoD (QualificationDocuments)')
-
-       
-        df_step4 = pd.DataFrame(worksheet.get_all_values()[0])
-
-        print(df_step4.head())
-        data = worksheet.get_all_values()
-        data = [row[:3] for row in data]
-        df_step4 = pd.DataFrame(data, columns=cols)
-        # for i in range(len(df_step4)):
-        #     new_row = [df_step4.iloc[i]['QualificationStep'],df_step4.iloc[i]['QualificationDocument'],df_step4.iloc[i]['Company GroningerID']]
-        #     new_df_step4.loc[len(new_df_step4)] = new_row
-
-        try:
-            NEW_SHEET_NAME = 'LoD (QualificationDocuments)'
-            worksheet = sht1.add_worksheet(title=NEW_SHEET_NAME, rows=200, cols=26)
-        except gspread.exceptions.APIError as e:
-            print(e)
-
-        worksheet = sht1.worksheet('LoD (QualificationDocuments)')
-        worksheet.update(df_step4.values.tolist())
-        formatting(worksheet)
+        lod_create(gc,sht1)
     else:
         print(f"Check the sheet for correct Formate and check if the spreadsheet does not have only one 'Master' sheet[here]({user_input})")
 
 
 # FastAPI route to retrieve data
-@app.get("/")
+@app.get("/",response_class=HTMLResponse)
 async def read_root(request: Request):
     # Render the HTML template with the data from the dataframe
-    #return templates.TemplateResponse("base.html", {"request": request, "data": df.to_dict(orient='records')})
-     return df.to_dict(orient='records')
-# FastAPI route to post data
+    context = {"request": request}
+
+    return templates.TemplateResponse("base.html", context)
 
 @app.post("/post_data")
 async def post_data(
@@ -709,11 +685,20 @@ async def post_data(
 
         if Category == "RA":
             execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials)
+            output_message = f"View here for output: {user_input}"
+
+        # Define a context with the output message
+            context = {"output_message": output_message}
 
         else :
             execute_URS(gc,sht1,FILE_ID,user_input,credentials)
+            output_message = f"View here for output: {user_input}"
+
+        # Define a context with the output message
+            context = {"output_message": output_message}
             
-        return {"message": f"Trace Matrix successfully generated. [Click here to view]({user_input})"}
+        return templates.TemplateResponse("index.html",context)
+    
     else:
         return {"error": "Invalid request method"}
         
