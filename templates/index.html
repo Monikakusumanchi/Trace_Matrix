@@ -1,39 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trace Matrix Generation</title>
 </head>
+
 <body>
     <h1>Trace Matrix Generation</h1>
-    <form action="/post" method="POST" id="data-form">
-        <div>
-            <!-- URL Textbox -->
-            <label for="user_input">{{user_input}}</label>
-            <input type="text" id="user_input" name="user_input" required>
-        </div>
+    <div>
+        <form method="POST">
+        Enter the URL : <input type="text" id="url_of_sheet" type="text">
+        <br>
+        Enter Category:
+        <label for="ra_radio">RA</label>
+        <input type="radio" id="ra_radio" name="Category" value="RA">
 
-        <div>
-            <!-- Radio Buttons for "URS" and "RA" -->
-            <p>Select an option:</p>
-            <label for="urs">URS</label>
-            <input type="radio" id="urs" name="Category" value="URS" required>
-            <label for="ra">RA</label>
-            <input type="radio" id="ra" name="Category" value="RA" required>
-        </div>
-
-        <div>
-            <!-- Checkbox for "Allow access" -->
-            <label for="allow_access">Allow access</label>
-            <input type="checkbox" id="allow_access" name="allow_access" value="yes">
-        </div>
-
-        <div>
-            <button type="submit" id="submit-button">Submit</button>
-        </div>
-    </form>
-
-    
+        <label for="urs_radio">URS</label>
+        <input type="radio" id="urs_radio" name="Category" value="URS">
+        <br>
+        <br>
+        <input type="checkbox" id="check1" name="option1" value="value1">
+        <label for="check1">I granted edit access to serivices@p-cube.com to the above spreadsheet</label>
+        <br><br>
+        <button class="btn btn-success" onclick="performMagic()"> submit </button>
+        </form>
+    </div>
 </body>
+<script>
+    function performMagic() {
+        const urlInput = document.getElementById("url_of_sheet").value;
+        const category = document.querySelector('input[name="Category"]:checked').value;
+        fetch("/post_data", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/x-www-form-urlencoded",
+            },
+            body: `url_input=${urlInput}&Category=${category}`,
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Handle the response from the server
+            console.log(data);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+
+    }
+</script>
 </html>

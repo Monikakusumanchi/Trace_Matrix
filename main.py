@@ -648,60 +648,60 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
 
 
 # FastAPI route to retrieve data
-@app.get("/",response_class=HTMLResponse)
+@app.get("/data",response_class=HTMLResponse)
 async def read_root(request: Request):
     # Render the HTML template with the data from the dataframe
     context = {"request": request}
 
-    return templates.TemplateResponse("base.html", context)
+    return templates.TemplateResponse("index.html", context)
 
-@app.post("/post_data")
+@app.post("/post_data",response_class=HTMLResponse)
 async def post_data(
     user_input: str = Form(...),
     Category: str = Form(...),
-    request: Request = "POST",    
 ):
-    if request.method == 'POST':
-        if Category not in ("URS", "RA"):
-            return {"error": "Invalid Category selection"}
-        #df = df._append(new_row, ignore_index=True)
-        match = re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", user_input)
-        print(match)
+
+    if Category not in ("URS", "RA"):
+        return {"error": "Invalid Category selection"}
+
+    match = re.search(r"/spreadsheets/d/([a-zA-Z0-9-_]+)", user_input)
+    print(match)
+    FILE_ID = match.group(1)
+
+    if match:
         FILE_ID = match.group(1)
-
-        if match:
-            FILE_ID = match.group(1)
-            print(FILE_ID)
-        else:
-            print("Invalid Google Sheets URL")
-            
-
-        #FILE_ID="19ZW_Eq3ySx925glrnokXDLBvx69_A7sTP02f8-NuB4Q"
-        credentials = ServiceAccountCredentials.from_json_keyfile_name('red-studio-400805-60aea2585639.json', ['https://www.googleapis.com/auth/spreadsheets'])
-
-        gc = gspread.authorize(credentials)
-       
-        sht1 = gc.open_by_key(FILE_ID)
-
-        if Category == "RA":
-            execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials)
-            output_message = f"View here for output: {user_input}"
-
-        # Define a context with the output message
-            context = {"output_message": output_message}
-
-        else :
-            execute_URS(gc,sht1,FILE_ID,user_input,credentials)
-            output_message = f"View here for output: {user_input}"
-
-        # Define a context with the output message
-            context = {"output_message": output_message}
-            
-        return templates.TemplateResponse("index.html",context)
-    
+        print(FILE_ID)
     else:
-        return {"error": "Invalid request method"}
+        print("Invalid Google Sheets URL")
         
-        
+
+    #FILE_ID="19ZW_Eq3ySx925glrnokXDLBvx69_A7sTP02f8-NuB4Q"
+    credentials = ServiceAccountCredentials.from_json_keyfile_name('red-studio-400805-60aea2585639.json', ['https://www.googleapis.com/auth/spreadsheets'])
+
+    gc = gspread.authorize(credentials)
+    
+    sht1 = gc.open_by_key(FILE_ID)
+    output_message = ""
+
+    if Category == "RA":
+        execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials)
+        output_message = f"View here for output: {user_input}"
+
+    # Define a context with the output message
+        context = {"output_message": output_message}
+
+    else :
+        execute_URS(gc,sht1,FILE_ID,user_input,credentials)
+        output_message = f"View here for output: {user_input}"
+
+    # Define a context with the output message
+        context = {"output_message": output_message}
+
+    context = {"output_message": output_message}
+  
+    return templates.TemplateResponse("index.html",context)
+
+
     
     
+
