@@ -1,12 +1,11 @@
-# Get the required Image
 FROM python:3.11
-
-# Specify Working Directory
+EXPOSE 8000
 WORKDIR /code
-# Copy everything in current directory to /code
-COPY . /code
 
-# install the rwquirements
+# Copy just the requirements file and install dependencies
+COPY requirements.txt ./
 RUN pip install -r requirements.txt
-# The last line is always a CMD in docker
+
+# Copy the rest of the application files
+COPY . ./
 CMD ["uvicorn", "main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
