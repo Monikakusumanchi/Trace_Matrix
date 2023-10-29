@@ -13,26 +13,13 @@ from collections import defaultdict
 from gspread_formatting import *
 from fastapi import Request, FastAPI, UploadFile, File, Form
 from fastapi.responses import HTMLResponse
-from fastapi.templating import Jinja2Templates
+# from fastapi.templating import Jinja2Templates
 
 
-templates = Jinja2Templates(directory="templates")
+# templates = Jinja2Templates(directory="templates")
 app = FastAPI()
 
-# # adding cors urls
-# origins=[
-#     'http://localhost',
-#     'http://localhost:3000',
-#     'https://*.gitpod.io/',
-# ]
-#  #add middleware
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     # allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"]
-# )
+
 # Create a sample dataframe
 df = pd.DataFrame(columns=['Enter the url', 'Category', 'Grant Access'])
 def formatting(worksheet):
@@ -97,37 +84,40 @@ def formatting(worksheet):
     
 
     print("Successfully made changes in the Google sheet.")
+
+
       #<========================LoD (QualificationDocuments)===============================>
-def lod_create(gc,sht1):   
-        cols = "QualificationStep,QualificationDocument,Company GroningerID".split(',')
+# def lod_create(gc,sht1):   
+#         cols = "QualificationStep,QualificationDocument,Company GroningerID".split(',')
 
-        FILE_ID_2 = '1lTuFfxbYnXgZMWXoJMFr2UcIr0cB16XOIcrMoXZ6jFw'
-        sht2 = gc.open_by_key(FILE_ID_2)
+#         FILE_ID_2 = '1lTuFfxbYnXgZMWXoJMFr2UcIr0cB16XOIcrMoXZ6jFw'
+#         sht2 = gc.open_by_key(FILE_ID_2)
 
-        worksheet = sht2.worksheet('LoD (QualificationDocuments)')
+#         worksheet = sht2.worksheet('LoD (QualificationDocuments)')
 
        
-        df_step4 = pd.DataFrame(worksheet.get_all_values()[0])
+#         df_step4 = pd.DataFrame(worksheet.get_all_values()[0])
 
-        print(df_step4.head())
-        data = worksheet.get_all_values()
-        data = [row[:3] for row in data]
-        df_step4 = pd.DataFrame(data, columns=cols)
-        # for i in range(len(df_step4)):
-        #     new_row = [df_step4.iloc[i]['QualificationStep'],df_step4.iloc[i]['QualificationDocument'],df_step4.iloc[i]['Company GroningerID']]
-        #     new_df_step4.loc[len(new_df_step4)] = new_row
+#         print(df_step4.head())
+#         data = worksheet.get_all_values()
+#         data = [row[:3] for row in data]
+#         df_step4 = pd.DataFrame(data, columns=cols)
+#         # for i in range(len(df_step4)):
+#         #     new_row = [df_step4.iloc[i]['QualificationStep'],df_step4.iloc[i]['QualificationDocument'],df_step4.iloc[i]['Company GroningerID']]
+#         #     new_df_step4.loc[len(new_df_step4)] = new_row
 
-        try:
-            NEW_SHEET_NAME = 'LoD (QualificationDocuments)'
-            worksheet = sht1.add_worksheet(title=NEW_SHEET_NAME, rows=200, cols=26)
-        except gspread.exceptions.APIError as e:
-            print(e)
+#         try:
+#             NEW_SHEET_NAME = 'LoD (QualificationDocuments)'
+#             worksheet = sht1.add_worksheet(title=NEW_SHEET_NAME, rows=200, cols=26)
+#         except gspread.exceptions.APIError as e:
+#             print(e)
 
-        worksheet = sht1.worksheet('LoD (QualificationDocuments)')
-        worksheet.update(df_step4.values.tolist())
-        formatting(worksheet)
+#         worksheet = sht1.worksheet('LoD (QualificationDocuments)')
+#         worksheet.update(df_step4.values.tolist())
+#         formatting(worksheet)
+
+
 def one_master_sheet(gc,sht1):
-
     worksheet_list = sht1.worksheets()
     if len(worksheet_list) == 1 and worksheet_list[0].title == 'Master':
         print("The spreadsheet have only one 'Master' sheet.")
@@ -150,10 +140,8 @@ def one_master_sheet(gc,sht1):
         return False
 
 def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
-  
     
     if one_master_sheet(gc,sht1):
-
 
         sht1 = gc.open_by_key(FILE_ID)
         worksheet = sht1.worksheet('Master')
@@ -398,7 +386,7 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
         # Update header and append data
         worksheet_step4.update([new_df_step4.columns.values.tolist()] + new_df_step4.values.tolist())
         formatting(worksheet_step4)
-        lod_create(gc,sht1)
+        # lod_create(gc,sht1)
 
         print(f"Trace Matrix successfully generated. [Click here to view]({user_input})")
         
@@ -422,18 +410,18 @@ def one_master_sheet_URS(gc,sht1):
         print("The spreadsheet does not have only one 'Master' sheet.")
         return False
 
+
 def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
 
     
     if one_master_sheet_URS(gc,sht1):
-
         gc = gspread.authorize(credentials)
         sht1 = gc.open_by_key(FILE_ID)
         worksheet = sht1.worksheet('Master')
         all_records = worksheet.get_all_records()
         #<========================20_URS_1===============================>
 
-        cols = "Requirement Num,DI Control,GxP Critical,Requirement Description".split(',')
+        cols = "Requirement Num,DI Control,GxP Critical,Requirement Description,Tag (QualificationDocuments)".split(',')
         headers = all_records[0].keys()  # Extract headers
         try:
             worksheet = sht1.worksheet('20_URS_1')
@@ -445,8 +433,8 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         df_step1 = pd.DataFrame(all_records)
 
         mask = df_step1['QP, BEA or ES'] == 'QP'
-        filtered_df = df_step1.loc[mask, ['Requirement-ID \nClient', 'DI Control', 'QP, BEA or ES', 'Requirement Description']]
-        filtered_df.columns = ['Requirement Num', 'DI Control', 'GxP Critical', 'Requirement Description']
+        filtered_df = df_step1.loc[mask, ['Requirement-ID \nClient', 'DI Control', 'QP, BEA or ES', 'Requirement Description', 'Tag (QualificationDocuments)']]
+        filtered_df.columns = ['Requirement Num', 'DI Control', 'GxP Critical', 'Requirement Description', 'Tag (QualificationDocuments)']
 
         # Create a new DataFrame and reset the index
         new_df_step1 = pd.DataFrame(filtered_df)
@@ -467,7 +455,7 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         #<========================30_URS Step1===============================>
 
 
-        cols = "Requirement from URS or RA,URS Num,RA Num,Name of Document,IQ,OQ,PQ,SOP".split(',')
+        cols = "Requirement from URS or RA,URS Num,RA Num,Name of Document,IQ,OQ,PQ,SOP,Tag (QualificationDocuments)".split(',')
 
         worksheet = sht1.worksheet('20_URS_1')
         df_step2 = pd.DataFrame(worksheet.get_all_records())
@@ -482,7 +470,7 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
 
         new_df_step2 = pd.DataFrame(columns=cols)
         for i in range(len(df_step2)):
-            new_row = [df_step2.iloc[i]['Requirement Description'],df_step2.iloc[i]['Requirement Num']," ", " ","X"," "," "," "]
+            new_row = [df_step2.iloc[i]['Requirement Description'],df_step2.iloc[i]['Requirement Num']," ", " ","X"," "," "," ",df_step2.iloc[i]['Tag (QualificationDocuments)']]
             new_df_step2.loc[len(new_df_step2)] = new_row
 
             
@@ -596,30 +584,32 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         ]
 
                     
-        extract_key = []
-        extract_delvirables = []
-        print(len(df_step3))
-        c = 0
-        for i in range(len(df_step3)):
-            found = False
-            for key in keywords:
-                if key in df_step3.iloc[i]['Requirement from URS or RA']:
-                    extract_key.append(key)
-                    found = True
-                    break
-            if not found:
-                extract_key.append(" ")
+        # extract_key = []
+        # extract_delvirables = []
+        # print(len(df_step3))
+        # c = 0
+        # for i in range(len(df_step3)):
+        #     found = False
+        #     for key in keywords:
+        #         if key in df_step3.iloc[i]['Requirement from URS or RA']:
+        #             extract_key.append(key)
+        #             found = True
+        #             break
+        #     if not found:
+        #         extract_key.append(" ")
 
-        for i in range(len(df_step3)):
-            found = False
-            for delv in deliverables:
-                if delv in df_step3.iloc[i]['Requirement from URS or RA']:
-                    extract_delvirables.append(delv)
-                    found = True
-                    break
-            if not found:
-                extract_delvirables.append(" ")  
-        cols = "Keywords1,Keywords2,Requirement from URS or RA,URS Num,RA Num,Name of Document,IQ,OQ,PQ,SOP".split(',')
+        # for i in range(len(df_step3)):
+        #     found = False
+        #     for delv in deliverables:
+        #         if delv in df_step3.iloc[i]['Requirement from URS or RA']:
+        #             extract_delvirables.append(delv)
+        #             found = True
+        #             break
+        #     if not found:
+        #         extract_delvirables.append(" ")  
+
+
+        cols = "Tag (QualificationDocuments),Requirement from URS or RA,URS Num,RA Num,Name of Document,IQ,OQ,PQ,SOP".split(',')
         new_df_step3 = pd.DataFrame(columns=cols)
 
     # print(extract_key)
@@ -627,8 +617,8 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
 
         for i in range(len(df_step3)):
                     new_row = {
-                        'Keywords1': extract_key[i],
-                        'Keywords2': extract_delvirables[i],
+                        'Tag (QualificationDocuments)':df_step3.iloc[i]['Tag (QualificationDocuments)'],
+                        # 'Keywords2': extract_delvirables[i],
                         'Requirement from URS or RA': df_step3.iloc[i]['Requirement from URS or RA'],
                         'URS Num': df_step3.iloc[i]['URS Num'],
                         'RA Num': df_step3.iloc[i]['RA Num'],
@@ -642,18 +632,19 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         worksheet = sht1.worksheet('Step2 TM')
         worksheet.update([new_df_step3.columns.values.tolist()] + new_df_step3.values.tolist())
         formatting(worksheet)
-        lod_create(gc,sht1)
+        # lod_create(gc,sht1)
     else:
         print(f"Check the sheet for correct Formate and check if the spreadsheet does not have only one 'Master' sheet[here]({user_input})")
 
 
-# FastAPI route to retrieve data
-@app.get("/data",response_class=HTMLResponse)
-async def read_root(request: Request):
-    # Render the HTML template with the data from the dataframe
-    context = {"request": request}
+# # FastAPI route to retrieve data
+# @app.get("/data",response_class=HTMLResponse)
+# async def read_root(request: Request):
+#     # Render the HTML template with the data from the dataframe
+#     context = {"request": request}
 
-    return templates.TemplateResponse("index.html", context)
+#     return templates.TemplateResponse("index.html", context)
+
 
 @app.post("/post_data",response_class=HTMLResponse)
 async def post_data(
@@ -683,25 +674,29 @@ async def post_data(
     sht1 = gc.open_by_key(FILE_ID)
     output_message = ""
 
-    if Category == "RA":
-        execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials)
-        output_message = f"View here for output: {user_input}"
+    # if Category == "RA":
+    #     execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials)
+    #     output_message = f"View here for output: {user_input}"
 
-    # Define a context with the output message
-        context = {"output_message": output_message}
+    # # Define a context with the output message
+    #     context = {"output_message": output_message}
 
-    else :
-        execute_URS(gc,sht1,FILE_ID,user_input,credentials)
-        output_message = f"View here for output: {user_input}"
+    # else :
+    #     execute_URS(gc,sht1,FILE_ID,user_input,credentials)
+    #     output_message = f"View here for output: {user_input}"
 
-    # Define a context with the output message
-        context = {"output_message": output_message}
+    # # Define a context with the output message
+    #     context = {"output_message": output_message}
 
-    context = {"output_message": output_message}
+    # context = {"output_message": output_message}
   
-    return templates.TemplateResponse("index.html",context)
+    # return templates.TemplateResponse("index.html",context)
 
+    if Category == "RA":
+        execute_RiskAnalysis(gc, sht1, FILE_ID, user_input, credentials)
+        output_message = f"View here for output: {user_input}"
+    else:
+        execute_URS(gc, sht1, FILE_ID, user_input, credentials)
+        output_message = f"View here for output: {user_input}"
 
-    
-    
-
+    return {"output_message": output_message}
