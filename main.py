@@ -21,20 +21,6 @@ from fastapi.templating import Jinja2Templates
 templates = Jinja2Templates(directory="templates")
 app = FastAPI()
 
-# # adding cors urls
-# origins=[
-#     'http://localhost',
-#     'http://localhost:3000',
-#     'https://*.gitpod.io/',
-# ]
-#  #add middleware
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],
-#     # allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"]
-# )
 # Create a sample dataframe
 df = pd.DataFrame(columns=['Enter the url', 'Category', 'Grant Access'])
 def formatting(worksheet):
@@ -65,6 +51,7 @@ def formatting(worksheet):
             right=border('SOLID', color=color(0, 0, 0))
         )
     )
+
     headers = worksheet.row_values(1)  # Get the headers from the first row
 
     num_columns = len(headers)
@@ -88,6 +75,7 @@ def formatting(worksheet):
 
     # Freeze the header row
     set_frozen(worksheet, rows=1)
+
     # Format the header row
     format_cell_range(worksheet, '1', header_fmt)
 
@@ -96,10 +84,11 @@ def formatting(worksheet):
 
     # Freeze the header row
     set_frozen(worksheet, rows=1)
-    
 
     print("Successfully made changes in the Google sheet.")
-      #<========================LoD (QualificationDocuments)===============================>
+
+
+    #<========================LoD (QualificationDocuments)===============================>
 def lod_create(gc,sht1):   
         cols = "QualificationStep,QualificationDocument,Company GroningerID".split(',')
 
@@ -107,7 +96,6 @@ def lod_create(gc,sht1):
         sht2 = gc.open_by_key(FILE_ID_2)
 
         worksheet = sht2.worksheet('LoD (QualificationDocuments)')
-
        
         df_step4 = pd.DataFrame(worksheet.get_all_values()[0])
 
@@ -115,9 +103,6 @@ def lod_create(gc,sht1):
         data = worksheet.get_all_values()
         data = [row[:3] for row in data]
         df_step4 = pd.DataFrame(data, columns=cols)
-        # for i in range(len(df_step4)):
-        #     new_row = [df_step4.iloc[i]['QualificationStep'],df_step4.iloc[i]['QualificationDocument'],df_step4.iloc[i]['Company GroningerID']]
-        #     new_df_step4.loc[len(new_df_step4)] = new_row
 
         try:
             NEW_SHEET_NAME = 'LoD (QualificationDocuments)'
@@ -128,14 +113,17 @@ def lod_create(gc,sht1):
         worksheet = sht1.worksheet('LoD (QualificationDocuments)')
         worksheet.update(df_step4.values.tolist())
         formatting(worksheet)
-def one_master_sheet(gc,sht1):
 
+
+
+def one_master_sheet(gc,sht1):
     worksheet_list = sht1.worksheets()
     if len(worksheet_list) == 1 and worksheet_list[0].title == 'Master':
         print("The spreadsheet have only one 'Master' sheet.")
         worksheet = sht1.worksheet('Master')
         all_records = worksheet.get_all_values()
         df = pd.DataFrame(all_records)
+
         expected_columns = ['Row ID#', 'Function of field unit', 'Potential \nfailure \nmode',
                                 'Potential \nEffects of \nfailure Mode', 'Machine \nreaction',
                                 'Potential\ncosequences\nfor the patient', 'Serverity\nRanking\n\nS',
@@ -151,17 +139,13 @@ def one_master_sheet(gc,sht1):
         print("The spreadsheet does not have only one 'Master' sheet.")
         return False
 
+
 def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
-  
-    
     if one_master_sheet(gc,sht1):
-
-
         sht1 = gc.open_by_key(FILE_ID)
         worksheet = sht1.worksheet('Master')
         data = worksheet.get_all_values()
         #<========================TM 1Step RA===============================>
-
         # Extract headers and ensure uniqueness
         headers = data[0]
         seen_headers = set()
@@ -170,7 +154,6 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
             if header in seen_headers:
                 headers[i] = f"{header}_{i}"
             seen_headers.add(header)
-
         # Extract relevant columns
         selected_columns = ['I', 'J', 'N', 'O']
         ijno_names = [headers[ord(i) - 65] for i in selected_columns]
@@ -251,6 +234,8 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
         formatting(worksheet)
         worksheet = sht1.worksheet('TM 1Step RA')
         df_step1 = worksheet.get_all_values()
+
+
         #<========================TM 2Step RA===============================>
         cols_step2 = ["Requirement from URS or RA", "URS Num", "RA Num", "Name of document", "IQ", "OQ", "PQ", "SOP"]
         # Extract headers and ensure uniqueness
@@ -293,6 +278,8 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
         # Append data
         worksheet_step2.append_rows(new_df_step2.values.tolist())
         formatting(worksheet_step2)
+
+
         #<========================TM 3Step RA===============================>
         cols_step3 = "Requirement from URS or RA,URS Num,RA Num,Name of document,IQ,OQ,PQ,SOP".split(',')
 
@@ -345,12 +332,10 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
         worksheet_step3.append_rows(new_df_step3.values.tolist())
         formatting(worksheet_step3)
 
+
         #<========================TM 4Step RA===============================>
-
-
         cols_step4 = "Requirement from URS or RA,URS Num,RA Num,Name of document,IQ,OQ,PQ,SOP".split(',')
         worksheet_step4_name = 'TM 4Step RA'
-        
         
         # Fetch data from TM 3Step RA worksheet
         worksheet_step3 = sht1.worksheet('TM 3Step RA')
@@ -384,7 +369,6 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
         new_df_step4 = pd.DataFrame(new_df_step4_rows, columns=cols_step4)
 
         # Update or create the worksheet 'TM 4Step RA'
-        
         worksheet_step4 = None
 
         try:
@@ -400,7 +384,7 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
         # Update header and append data
         worksheet_step4.update([new_df_step4.columns.values.tolist()] + new_df_step4.values.tolist())
         formatting(worksheet_step4)
-        lod_create(gc,sht1)
+        # lod_create(gc,sht1)
 
         print(f"Trace Matrix successfully generated. [Click here to view]({user_input})")
         
@@ -409,7 +393,6 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
 
 
 def one_master_sheet_URS(gc,sht1):
- 
     worksheet_list = sht1.worksheets()
     if len(worksheet_list) == 1 and worksheet_list[0].title == 'Master':
         print("The spreadsheet have only one 'Master' sheet.")
@@ -424,31 +407,29 @@ def one_master_sheet_URS(gc,sht1):
         print("The spreadsheet does not have only one 'Master' sheet.")
         return False
 
+
 def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
-
-    
     if one_master_sheet_URS(gc,sht1):
-
         gc = gspread.authorize(credentials)
         sht1 = gc.open_by_key(FILE_ID)
         worksheet = sht1.worksheet('Master')
         all_records = worksheet.get_all_records()
         #<========================20_URS_1===============================>
 
-        cols = "Requirement Num,DI Control,GxP Critical,Requirement Description".split(',')
+        cols = "Requirement Num,DI Control,GxP Critical,Requirement Description,Tag (QualificationDocuments)".split(',')
         headers = all_records[0].keys()  # Extract headers
         try:
             worksheet = sht1.worksheet('20_URS_1')
         except gspread.exceptions.WorksheetNotFound:
-            worksheet = sht1.add_worksheet(title='20_URS_1', rows="100", cols="20")
+            worksheet = sht1.add_worksheet(title='20_URS_1', rows="115", cols="20")
 
         # Clear the worksheet
         worksheet.clear()
         df_step1 = pd.DataFrame(all_records)
 
         mask = df_step1['QP, BEA or ES'] == 'QP'
-        filtered_df = df_step1.loc[mask, ['Requirement-ID \nClient', 'DI Control', 'QP, BEA or ES', 'Requirement Description']]
-        filtered_df.columns = ['Requirement Num', 'DI Control', 'GxP Critical', 'Requirement Description']
+        filtered_df = df_step1.loc[mask, ['Requirement-ID \nClient', 'DI Control', 'QP, BEA or ES', 'Requirement Description',',Tag (QualificationDocuments)']]
+        filtered_df.columns = ['Requirement Num', 'DI Control', 'GxP Critical', 'Requirement Description',',Tag (QualificationDocuments)']
 
         # Create a new DataFrame and reset the index
         new_df_step1 = pd.DataFrame(filtered_df)
@@ -466,10 +447,9 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         worksheet.update([new_df_step1.columns.values.tolist()] + new_df_step1.values.tolist())
         formatting(worksheet)
 
+
         #<========================30_URS Step1===============================>
-
-
-        cols = "Requirement from URS or RA,URS Num,RA Num,Name of Document,IQ,OQ,PQ,SOP".split(',')
+        cols = "Requirement from URS or RA,URS Num,RA Num,Name of Document,IQ,OQ,PQ,SOP,Tag (QualificationDocuments)".split(',')
 
         worksheet = sht1.worksheet('20_URS_1')
         df_step2 = pd.DataFrame(worksheet.get_all_records())
@@ -481,20 +461,20 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         # Clear the worksheet
         worksheetURS_step1.clear()
         print("data is cleared")
-
         new_df_step2 = pd.DataFrame(columns=cols)
-        for i in range(len(df_step2)):
-            new_row = [df_step2.iloc[i]['Requirement Description'],df_step2.iloc[i]['Requirement Num']," ", " ","X"," "," "," "]
-            new_df_step2.loc[len(new_df_step2)] = new_row
 
+        for i in range(len(df_step2)):
+            new_row = [df_step2.iloc[i]['Requirement Description'],df_step2.iloc[i]['Requirement Num']," ", " ","X"," "," "," ",df_step2.iloc[i]['Tag (QualificationDocuments)']]
+            new_df_step2.loc[len(new_df_step2)] = new_row
             
         worksheetURS_step1 = sht1.worksheet('30_URS Step1')
         worksheetURS_step1.update([new_df_step2.columns.values.tolist()] + new_df_step2.values.tolist())
         print("data is appended")
         formatting(worksheetURS_step1)
 
-        #<========================Step2 TM===============================>
 
+
+        #<========================Step2 TM===============================>
         df_step3 = pd.DataFrame(worksheetURS_step1.get_all_records())
         try:
             worksheet_step2= sht1.worksheet('Step2 TM')
@@ -503,134 +483,14 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
 
         # Clear the worksheet
         worksheet_step2.clear()
-        keywords = [
-        "PLC",
-        "Software / firmware" ,
-        "fieldbus",
-        "operator station",
-        "view",
-        "system area" ,
-        "batch environment applications",
-        "Recipe parameters",
-        "Recipe management",
-        "Limits",
-        "batch the data",
-        "synchronize the date and time",
-        "Central European Time",
-        "Date Time Format",
-        "computerized systems",
-        "Computer systems",
-        "retain data",
-        "complete and relevant raw data, metadata, audit trail",
-        "batch release",
-        "Users shall be restricted",
-        "Users shall not have access",
-        "regulated data",
-        "removable media",
-        "operator actions",
-        "exchange raw data",
-        "OSI PI",
-        "audit trail",
-        "System failure",
-        "OEM",
-        "cycle parameters",
-        "access controlled",
-        "reports",
-        "Data Historian"
-        ]
 
-        deliverables = [
-        "retain Cycle Parameters",
-        "version controlled",
-        "health status",
-        "control all system areas",
-        "operators shall be assigned",
-        "relevance to this system",
-        "audit trailing",
-        "access control, full audit trail traceability and version controlled",
-        "All modifications are logged",
-        "Naming convention",
-        "SNTP service",
-        "data integrity",
-        "critical operations, data integrity",
-        "execution of critical operations",
-        "raw data, metadata, and audit trail",
-        "Retain data, Metadata, audittrail",
-        "electronic record",
-        "electronic records",
-        "restricted to modify date and time",
-        "no access to modifiing data",
-        "not to be used to store data",
-        "need justification",
-        "built-in integrity checks",
-        "tracebility to originated source",
-        "backup",
-        "archive",
-        "no access to modifiing data",
-        "error handling process required",
-        "with buffer to avoid data loss",
-        "paper and electronic copies",
-        "paper and electronic copies, with filter",
-        "retain data till process is completed",
-        "must be accurate, complete, and legible and must retain the original meaning of the data.",
-        "no loss of existing GMP data",
-        "belongs to the maintanence mode",
-        "accessable from  HMI",
-        "View the status of the equipment",
-        "Acknowledge and reset alarms",
-        "Configure PID loop parameters",
-        "Configure alarm and operating setpoints.",
-        "Process monitoring shall be provided to detect unexpected or critical situations.",
-        "The Batch report shall be customized according to MSD needs.",
-        "Include at least the following list of required items for the batch report:",
-        "Batch Number, Material Numbers, User ID of active user performing the batch",
-        "Start and stop times of all batches.",
-        "Specific alarms for the batch",
-        "CPP’s – alarms or positive confirmation of correct values.",
-        "MSD logo, proprietary signage and equipment number.",
-        "generate",
-        "reprint with print number",
-        "storage, archive",
-        "transfer all data to DH",
-        "retain data, metadata, and audit trail",
-        "system used to record",
-        "obscure or modify the stored or displayed data",
-        ]
-
-                    
-        extract_key = []
-        extract_delvirables = []
-        print(len(df_step3))
-        c = 0
-        for i in range(len(df_step3)):
-            found = False
-            for key in keywords:
-                if key in df_step3.iloc[i]['Requirement from URS or RA']:
-                    extract_key.append(key)
-                    found = True
-                    break
-            if not found:
-                extract_key.append(" ")
-
-        for i in range(len(df_step3)):
-            found = False
-            for delv in deliverables:
-                if delv in df_step3.iloc[i]['Requirement from URS or RA']:
-                    extract_delvirables.append(delv)
-                    found = True
-                    break
-            if not found:
-                extract_delvirables.append(" ")  
-        cols = "Keywords1,Keywords2,Requirement from URS or RA,URS Num,RA Num,Name of Document,IQ,OQ,PQ,SOP".split(',')
+        cols = "Keywords1,Requirement from URS or RA,URS Num,RA Num,Name of Document,IQ,OQ,PQ,SOP,Tag (QualificationDocuments)".split(',')
         new_df_step3 = pd.DataFrame(columns=cols)
 
-    # print(extract_key)
-    # print(extract_delvirables)
 
         for i in range(len(df_step3)):
                     new_row = {
-                        'Keywords1': extract_key[i],
-                        'Keywords2': extract_delvirables[i],
+                        'Tag (QualificationDocuments)':df_step3.iloc[i]['Tag (QualificationDocuments)'],
                         'Requirement from URS or RA': df_step3.iloc[i]['Requirement from URS or RA'],
                         'URS Num': df_step3.iloc[i]['URS Num'],
                         'RA Num': df_step3.iloc[i]['RA Num'],
@@ -644,7 +504,7 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         worksheet = sht1.worksheet('Step2 TM')
         worksheet.update([new_df_step3.columns.values.tolist()] + new_df_step3.values.tolist())
         formatting(worksheet)
-        lod_create(gc,sht1)
+        # lod_create(gc,sht1)
     else:
         print(f"Check the sheet for correct Formate and check if the spreadsheet does not have only one 'Master' sheet[here]({user_input})")
 
@@ -709,8 +569,3 @@ async def post_data(request: Request,
     context = {"output_message": output_message}
   
     return templates.TemplateResponse("index.html",{"request": request,  "output":context })
-
-
-    
-    
-
