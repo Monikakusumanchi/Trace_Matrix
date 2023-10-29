@@ -1,3 +1,4 @@
+{% block content %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -10,8 +11,8 @@
 <body>
     <h1>Trace Matrix Generation</h1>
     <div>
-        <form method="POST">
-        Enter the URL : <input type="text" id="url_of_sheet" type="text">
+        <form method="POST" action="post_data" enctype="multipart/form-data">
+        Enter the URL : <input type="text" name="user_input" id="url_of_sheet" type="text">
         <br>
         Enter Category:
         <label for="ra_radio">RA</label>
@@ -26,8 +27,9 @@
         <br><br>
         <button class="btn btn-success" onclick="performMagic()"> submit </button>
         </form>
+        <h1>Output: {{output}}</h1>
     </div>
-</body>
+
 <script>
     function performMagic() {
         const urlInput = document.getElementById("url_of_sheet").value;
@@ -50,4 +52,6 @@
 
     }
 </script>
+{% endblock %}
+</body>
 </html>

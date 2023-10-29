@@ -1,8 +1,10 @@
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import RedirectResponse
 import pandas as pd
 import numpy as np
 import time
 import re
+from typing import Annotated
 from pydrive.auth import GoogleAuth
 from pydrive.drive import GoogleDrive
 from oauth2client.client import GoogleCredentials
@@ -646,6 +648,9 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
     else:
         print(f"Check the sheet for correct Formate and check if the spreadsheet does not have only one 'Master' sheet[here]({user_input})")
 
+@app.get("/")
+async def dynamic_file(request: Request):
+    return templates.TemplateResponse("base.html", {"request": request})
 
 # FastAPI route to retrieve data
 @app.get("/data",response_class=HTMLResponse)
@@ -654,13 +659,17 @@ async def read_root(request: Request):
     context = {"request": request}
 
     return templates.TemplateResponse("index.html", context)
+@app.post("/post_data/{data_path:path}")
+async def get_data(data_path: str):
+    # Process data_path if needed
+    # For now, redirect to the original /postdata
+    return RedirectResponse(url="/post_data")
 
-@app.post("/post_data",response_class=HTMLResponse)
-async def post_data(
-    user_input: str = Form(...),
-    Category: str = Form(...),
-):
-
+@app.post("/post_data")
+async def post_data(request: Request, 
+                    user_input: Annotated[str,Form(...)],
+                    Category: Annotated[str,Form(...)]
+                    ):
     if Category not in ("URS", "RA"):
         return {"error": "Invalid Category selection"}
 
@@ -699,7 +708,7 @@ async def post_data(
 
     context = {"output_message": output_message}
   
-    return templates.TemplateResponse("index.html",context)
+    return templates.TemplateResponse("index.html",{"request": request,  "output":context })
 
 
     
