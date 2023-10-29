@@ -89,30 +89,30 @@ def formatting(worksheet):
 
 
     #<========================LoD (QualificationDocuments)===============================>
-def lod_create(gc,sht1):   
-        cols = "QualificationStep,QualificationDocument,Company GroningerID".split(',')
+# def lod_create(gc,sht1):   
+#         cols = "QualificationStep,QualificationDocument,Company GroningerID".split(',')
 
-        FILE_ID_2 = '1lTuFfxbYnXgZMWXoJMFr2UcIr0cB16XOIcrMoXZ6jFw'
-        sht2 = gc.open_by_key(FILE_ID_2)
+#         FILE_ID_2 = '1lTuFfxbYnXgZMWXoJMFr2UcIr0cB16XOIcrMoXZ6jFw'
+#         sht2 = gc.open_by_key(FILE_ID_2)
 
-        worksheet = sht2.worksheet('LoD (QualificationDocuments)')
+#         worksheet = sht2.worksheet('LoD (QualificationDocuments)')
        
-        df_step4 = pd.DataFrame(worksheet.get_all_values()[0])
+#         df_step4 = pd.DataFrame(worksheet.get_all_values()[0])
 
-        print(df_step4.head())
-        data = worksheet.get_all_values()
-        data = [row[:3] for row in data]
-        df_step4 = pd.DataFrame(data, columns=cols)
+#         print(df_step4.head())
+#         data = worksheet.get_all_values()
+#         data = [row[:3] for row in data]
+#         df_step4 = pd.DataFrame(data, columns=cols)
 
-        try:
-            NEW_SHEET_NAME = 'LoD (QualificationDocuments)'
-            worksheet = sht1.add_worksheet(title=NEW_SHEET_NAME, rows=200, cols=26)
-        except gspread.exceptions.APIError as e:
-            print(e)
+#         try:
+#             NEW_SHEET_NAME = 'LoD (QualificationDocuments)'
+#             worksheet = sht1.add_worksheet(title=NEW_SHEET_NAME, rows=200, cols=26)
+#         except gspread.exceptions.APIError as e:
+#             print(e)
 
-        worksheet = sht1.worksheet('LoD (QualificationDocuments)')
-        worksheet.update(df_step4.values.tolist())
-        formatting(worksheet)
+#         worksheet = sht1.worksheet('LoD (QualificationDocuments)')
+#         worksheet.update(df_step4.values.tolist())
+#         formatting(worksheet)
 
 
 
@@ -387,10 +387,10 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
         # lod_create(gc,sht1)
 
         print(f"Trace Matrix successfully generated. [Click here to view]({user_input})")
-        
+        output_message = f"Trace Matrix successfully generated. [Click here to view]({user_input}"
     else :
-        print(f"Check the sheet for correct Formate and check if the spreadsheet does not have only one 'Master' sheet [here]({user_input})")
-
+        output_message = f"Check the sheet for correct format and check if the spreadsheet does not have only one 'Master' sheet. <a href='{user_input}'>Here</a>"
+    return output_message
 
 def one_master_sheet_URS(gc,sht1):
     worksheet_list = sht1.worksheets()
@@ -504,9 +504,11 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         worksheet = sht1.worksheet('Step2 TM')
         worksheet.update([new_df_step3.columns.values.tolist()] + new_df_step3.values.tolist())
         formatting(worksheet)
+        output_message = f"View here for output: {user_input}"
         # lod_create(gc,sht1)
     else:
-        print(f"Check the sheet for correct Formate and check if the spreadsheet does not have only one 'Master' sheet[here]({user_input})")
+        output_message = f"Check the sheet for correct format and check if the spreadsheet does not have only one 'Master' sheet. <a href='{user_input}'>Here</a>"
+    return output_message
 
 @app.get("/")
 async def dynamic_file(request: Request):
@@ -553,19 +555,11 @@ async def post_data(request: Request,
     output_message = ""
 
     if Category == "RA":
-        execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials)
-        output_message = f"View here for output: {user_input}"
-
-    # Define a context with the output message
-        context = {"output_message": output_message}
+        output_message = execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials)
+  
 
     else :
-        execute_URS(gc,sht1,FILE_ID,user_input,credentials)
-        output_message = f"View here for output: {user_input}"
+        output_message = execute_URS(gc,sht1,FILE_ID,user_input,credentials)
 
-    # Define a context with the output message
-        context = {"output_message": output_message}
-
-    context = {"output_message": output_message}
-  
+    context = {output_message}
     return templates.TemplateResponse("index.html",{"request": request,  "output":context })

@@ -27,7 +27,9 @@
         <br><br>
         <button class="btn btn-success" onclick="performMagic()"> submit </button>
         </form>
-        <h1>Output: {{output}}</h1>
+        <p>{% autoescape off %}
+            {{ output | safe }}
+            {% endautoescape %}</p>
     </div>
 
 <script>
