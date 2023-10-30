@@ -428,8 +428,8 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         df_step1 = pd.DataFrame(all_records)
 
         mask = df_step1['QP, BEA or ES'] == 'QP'
-        filtered_df = df_step1.loc[mask, ['Requirement-ID \nClient', 'DI Control', 'QP, BEA or ES', 'Requirement Description',',Tag (QualificationDocuments)']]
-        filtered_df.columns = ['Requirement Num', 'DI Control', 'GxP Critical', 'Requirement Description',',Tag (QualificationDocuments)']
+        filtered_df = df_step1.loc[mask, ['Requirement-ID \nClient', 'DI Control', 'QP, BEA or ES', 'Requirement Description','Tag (QualificationDocuments)']]
+        filtered_df.columns = ['Requirement Num', 'DI Control', 'GxP Critical', 'Requirement Description','Tag (QualificationDocuments)']
 
         # Create a new DataFrame and reset the index
         new_df_step1 = pd.DataFrame(filtered_df)
@@ -479,14 +479,13 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         try:
             worksheet_step2= sht1.worksheet('Step2 TM')
         except gspread.exceptions.WorksheetNotFound:
-            worksheet_step2 = sht1.add_worksheet(title='Step2 TM', rows="100", cols="20")
+            worksheet_step2 = sht1.add_worksheet(title='Step2 TM', rows="115", cols="20")
 
         # Clear the worksheet
         worksheet_step2.clear()
 
-        cols = "Keywords1,Requirement from URS or RA,URS Num,RA Num,Name of Document,IQ,OQ,PQ,SOP,Tag (QualificationDocuments)".split(',')
+        cols = "Tag (QualificationDocuments),Requirement from URS or RA,URS Num,RA Num,Name of Document,IQ,OQ,PQ,SOP".split(',')
         new_df_step3 = pd.DataFrame(columns=cols)
-
 
         for i in range(len(df_step3)):
                     new_row = {
