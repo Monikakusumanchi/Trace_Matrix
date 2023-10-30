@@ -1,5 +1,6 @@
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import RedirectResponse
+from fastapi.responses import JSONResponse
 import pandas as pd
 import numpy as np
 import time
@@ -387,7 +388,9 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
         # lod_create(gc,sht1)
 
         print(f"Trace Matrix successfully generated. [Click here to view]({user_input})")
-        output_message = f"Trace Matrix successfully generated. [Click here to view]({user_input}"
+        output_message = f"Trace Matrix successfully generated . <a href='{user_input}'>Click Here to view</a>"
+        print(output_message)
+
     else :
         output_message = f"Check the sheet for correct format and check if the spreadsheet does not have only one 'Master' sheet. <a href='{user_input}'>Here</a>"
     return output_message
@@ -503,15 +506,16 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         worksheet = sht1.worksheet('Step2 TM')
         worksheet.update([new_df_step3.columns.values.tolist()] + new_df_step3.values.tolist())
         formatting(worksheet)
-        output_message = f"View here for output: {user_input}"
+        output_message = f"Trace Matrix successfully generated . <a href='{user_input}'>Click Here to view</a>"
         # lod_create(gc,sht1)
     else:
         output_message = f"Check the sheet for correct format and check if the spreadsheet does not have only one 'Master' sheet. <a href='{user_input}'>Here</a>"
+        print(output_message)
     return output_message
 
 @app.get("/")
 async def dynamic_file(request: Request):
-    return templates.TemplateResponse("base.html", {"request": request})
+    return templates.TemplateResponse("intro.html", {"request": request})
 
 # FastAPI route to retrieve data
 @app.get("/data",response_class=HTMLResponse)
@@ -555,10 +559,14 @@ async def post_data(request: Request,
 
     if Category == "RA":
         output_message = execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials)
+        print(output_message)
   
 
     else :
         output_message = execute_URS(gc,sht1,FILE_ID,user_input,credentials)
+        print(output_message)
 
-    context = {output_message}
-    return templates.TemplateResponse("index.html",{"request": request,  "output":context })
+    print(output_message)
+    
+    return JSONResponse(content=output_message)
+   # return templates.TemplateResponse("intro.html",{"request": request,  "output":output_message })

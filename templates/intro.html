@@ -1,0 +1,127 @@
+{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generation of Trace Matrix</title>
+
+    <!-- Add Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-...">
+
+    <style>
+        /* Add your custom styles here if needed */
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .login-container {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        .center-title {
+            text-align: left;
+        }
+        .output-box {
+            display: none;
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    
+    <div class="login-container">
+        <h1 class="center-title">Generation of Trace Matrix</h1>
+        <!-- <form method="POST" action="post_data" enctype="multipart/form-data"> -->
+       <form id="traceForm" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="urlInput" class="form-label">URL</label>
+                <input type="text" class="form-control" id="urlInput" name="user_input" style="max-width: 350px;" placeholder="Enter URL of the spreadsheet">
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Category</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="Category" id="ursRadio" value="URS">
+                    <label class="form-check-label" for="ursRadio">
+                        URS
+                    </label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="Category" id="riskAnalysisRadio" value="RA">
+                    <label class="form-check-label" for="riskAnalysisRadio">
+                        Risk Analysis
+                    </label>
+                </div>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="grantAccessCheckbox">
+                <label class="form-check-label" for="grantAccessCheckbox">
+                    I granted edit access to services@p-cube.com to the above spreadsheet
+                </label>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3">Submit</button>
+        </form>
+        <div class="loading" id="loading">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+        <div class="output-box" id="outputBox" style="background-color: #FF6A74;">
+            <p id="outputData">{% autoescape off %}
+                {{ output | safe }}
+                {% endautoescape %}
+            </p>
+        </div>
+    </div>
+
+    <!-- Add Bootstrap JS and Popper.js (Optional) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js" integrity="sha384-..."></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-..."></script>
+
+    <script>
+        document.getElementById('traceForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            document.getElementById('loading').style.display = 'block'; // Show loading animation
+    
+            // Record the start time
+            const startTime = new Date().getTime();
+    
+            // Make an asynchronous request to your FastAPI endpoint
+            fetch('/post_data', {
+                method: 'POST',
+                body: new FormData(document.getElementById('traceForm'))
+            })
+                .then(response => response.text())
+                .then(data => {
+                    const endTime = new Date().getTime();
+                    const elapsedTime = (endTime - startTime) / 1000; // Convert to seconds
+    
+                    if (elapsedTime > 5) {
+                        document.getElementById('outputBox').style.backgroundColor = '#ddffdd';
+                    } else {
+                        document.getElementById('outputBox').style.backgroundColor = " #FF6A74 ";
+                    }
+    
+                    document.getElementById('loading').style.display = 'none'; // Hide loading animation
+                    document.getElementById('outputBox').style.display = 'block'; // Show output
+                    document.getElementById('outputData').innerHTML = data; // Update the output box with the data from FastAPI
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+        });
+    </script>    
+    {% endblock %}
+</body>
+</html>
