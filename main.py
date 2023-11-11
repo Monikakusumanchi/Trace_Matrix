@@ -173,6 +173,87 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
     formatting(worksheet)
     worksheet = sht1.worksheet('TM 1Step RA')
     #<========================TM 1Step RA===============================>
+    new_df_step4_rano_dict_2 = defaultdict(set)
+
+    for i in range(len(df2['Requirement from URS or RA'])):
+        ra_nums = set(map(int, str(df2.iloc[i]['RA Num']).split(',')))
+        req_type = df2.iloc[i]['Requirement from URS or RA']
+
+        if 'OQ alarm Test' in req_type:
+            new_df_step4_rano_dict_2['OQ alarm Test: all sensors'].update(ra_nums)
+        elif 'OQ calibration Sensor' in req_type:
+            new_df_step4_rano_dict_2['OQ calibration-all sensors'].update(ra_nums)
+        else:
+            new_df_step4_rano_dict_2[str(req_type)].update(ra_nums)
+    name_of_OQ_test = {
+    'OQ calibration-all sensors': 1,
+    'OQ alarm Test: all sensors':2,
+    'OQ Test reaction of system in the case of power loss':3,
+    'OQ Test Access Control':4,
+    'OQ Test Verification of User Accounts and responsibilities of all users incl. Emergency accounts':5,
+    'OQ Test Verification of syncronization with time server':6,
+    'OQ Test Verification of batch functions':7,
+    'OQ Test Verification of recipies':8,
+    'OQ Test Verification of backup after program changes & desaster recovery':9,
+    'OQ Test Verification that all ports of the PC-System are deactivated':10,
+    'OQ Test Verification of Gateway to Data Historian':11,
+    'OQ Test Verification of Audit trail for GMP relevant functions':12,
+    'OQ Test Verification of GMP relevant counters':13,
+    'OQ Test of shift register':14,
+    'OQ Test Software review for GAMP5 Class 5 software':15,
+    'OQ Test Verification of redundant Servers':16,
+    'OQ functional test':17.1,
+    }
+    df_name_of_OQ_test = pd.DataFrame(list(name_of_OQ_test.items()), columns=['key', 'value'])
+    df_dicts = pd.DataFrame(list(new_df_step4_rano_dict_2.items()), columns=['key', 'value'])
+    new_df_step4_rano_df = pd.DataFrame(list(new_df_step4_rano_dict_2.items()), columns=['Requirement from URS or RA', 'RA Num'])
+    new_df_step4_rano_df['RA Num'] = new_df_step4_rano_df['RA Num'].apply(lambda x: str(sorted(x))[1:-1])
+    count = 17
+    list_of_OQ = []
+    for index, row in df_name_of_OQ_test.iterrows():
+        for key, val in new_df_step4_rano_df.iterrows():
+            if row['key'] in val['Requirement from URS or RA']:
+                if row['key'] == 'OQ functional test':
+                    count += 0.1
+                    row_val = count
+                else:
+                    row_val = row['value']
+                print(row['key'],round(row_val,2))
+                list_of_OQ.append(round(row_val,2))
+    print(list_of_OQ)
+    cols = "Requirement from URS or RA,URS Num,RA Num,Name of document,IQ,OQ,PQ,SOP".split(',')
+    rows = []
+
+    for index, row in new_df_step4_rano_df.iterrows():
+        new_row = {
+            'Requirement from URS or RA': row['Requirement from URS or RA'],
+            'URS Num': ' ',
+            'RA Num': row['RA Num'],
+            'Name of document': row['Requirement from URS or RA'],
+            'IQ': " ",
+            'OQ': list_of_OQ[index],
+            'PQ': " ",
+            'SOP': " "
+        }
+        rows.append(new_row)
+    new_df_step4 = pd.DataFrame(rows, columns=cols)
+    worksheet_name = 'TM 4Step RA'
+    worksheet = None
+    try:
+        worksheet = sh.worksheet(worksheet_name)
+    except gspread.exceptions.WorksheetNotFound:
+        # If the worksheet is not found, create it
+        worksheet = sh.add_worksheet(title=worksheet_name, rows=1, cols=len(df2.columns))
+    else:
+        # If the worksheet exists, clear its content
+        worksheet.clear()
+    worksheet.update('A1', [new_df_step4.columns.values.tolist()])  # Update header
+
+    
+    worksheet.append_rows(new_df_step4.values.tolist())
+    formatting(worksheet)
+    worksheet = sht1.worksheet('TM 4Step RA')
+    #<========================TM 1Step RA===============================>
     print(f"Trace Matrix successfully generated. [Click here to view]({user_input})")
     output_message = f"Trace Matrix successfully generated . <a href='{user_input}'>Click Here to view</a>"
     return output_message
