@@ -209,15 +209,15 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         new_df_step2.loc[len(new_df_step2)] = new_row
     #<========================20_URS_1===============================>
     try:
-        worksheet = sht1.worksheet('30_URS_1')
+        worksheet = sht1.worksheet('30_1 st step TM')
     except gspread.exceptions.WorksheetNotFound:
-        worksheet = sht1.add_worksheet(title='30_URS_1', rows="115", cols="20")
+        worksheet = sht1.add_worksheet(title='30_1 st step TM', rows="115", cols="20")
 
     # Clear the worksheet
     worksheet.clear()
     
     # Update the Google Sheets worksheet
-    worksheet = sht1.worksheet('30_URS_1')
+    worksheet = sht1.worksheet('30_1 st step TM')
     worksheet.update([new_df_step2.columns.values.tolist()] + new_df_step2.values.tolist())
     formatting(worksheet)    
     output_message = f"Trace Matrix successfully generated . <a href='{user_input}'>Click Here to view</a>"
