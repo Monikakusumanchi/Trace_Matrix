@@ -87,6 +87,12 @@ def formatting(worksheet):
     set_frozen(worksheet, rows=1)
 
     print("Successfully made changes in the Google sheet.")
+    
+def fn(ijno_val, val):
+    if ijno_val.startswith(val):
+        return "X"
+    else:
+        return "" 
 
 def one_master_sheet(gc,sht1,Master_columns):
     worksheet_list = sht1.worksheets()
@@ -105,27 +111,30 @@ def one_master_sheet(gc,sht1,Master_columns):
             else:
                 print("The spreadsheet does not have only one 'Master' sheet.")
                 return False
-def fn(ijno_val, val):
-    if ijno_val.startswith(val):
-        return "X"
-    else:
-        return "" 
 
-def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials,RA_Master_columns):
+
+def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
     #sht1 = gc.open_by_key(FILE_ID)
     worksheet = sht1.worksheet('Master')
-    df = worksheet.get_all_values()
-    df=pd.DataFrame(df)
+    data = worksheet.get_all_values()
+    df=pd.DataFrame(data)
+    print("data_of_df is:",df)
+    cols = data[:1][0]
+    print("columns are:",cols)
+    for i in range(len(cols)):
+        cols[i] = cols[i].replace("\n"," ").strip()
+    df = pd.DataFrame(data[1:], columns = cols)
+    df = df.iloc[:, :20]
+
+    df.info()
     df_new = pd.DataFrame(np.repeat(df.values, 4, axis=0),columns = df.columns)
-    #df_new.info()
+    df_new.info()
     df_new["Controls"] = ""
     for i in range(len(df)):
         df_new.at[4*i,"Controls"] = df.iloc[i][8]
         df_new.at[4*i+1,"Controls"] = df.iloc[i][9]
         df_new.at[4*i+2,"Controls"] = df.iloc[i][13]
         df_new.at[4*i+3,"Controls"] = df.iloc[i][14]
-    #df_new.head(8)
-
     df_new['IQ'] = df_new["Controls"].apply(lambda X: fn(X,"IQ"))
     df_new['OQ'] = df_new["Controls"].apply(lambda X: fn(X,"OQ"))
     df_new['PQ'] = df_new["Controls"].apply(lambda X: fn(X,"PQ"))
@@ -134,6 +143,7 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials,RA_Master_column
     df2 = pd.DataFrame()
     df2['Controls'] = df_new['Controls']
     df2['Function of Field Unit'] = df_new['Function of field unit']
+
     df2['Requirement from URS or RA'] = df_new['Controls'] + " " + df_new['Function of field unit']
     df2['URS Num'] = " "
     df2['RA Num'] = df_new['Row ID#']
@@ -167,21 +177,6 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials,RA_Master_column
     output_message = f"Trace Matrix successfully generated . <a href='{user_input}'>Click Here to view</a>"
     return output_message
 
-def one_master_sheet_URS(gc,sht1):
-    worksheet_list = sht1.worksheets()
-    if len(worksheet_list) == 1 and worksheet_list[0].title == 'Master':
-        print("The spreadsheet have only one 'Master' sheet.")
-        worksheet = sht1.worksheet('Master')
-        all_records = worksheet.get_all_values()
-        df = pd.DataFrame(all_records)
-        URS_Master_columns = ['Requirement-ID \nLSE', '', 'Requirement-ID \nClient', 'DI Control',
-        'QP, BEA or ES', 'Requirement \nGroup', 'IQ-Plan', 'OQ-Test', 'SOP ',
-        'Tag (QualificationDocuments)', 'Requirement Description', 'Remark']
-        return True
-    else:
-        print("The spreadsheet does not have only one 'Master' sheet.")
-        return False
-
 
 def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
     #gc = gspread.authorize(credentials)
@@ -214,17 +209,18 @@ def execute_URS(gc,sht1,FILE_ID,user_input,credentials):
         new_df_step2.loc[len(new_df_step2)] = new_row
     #<========================20_URS_1===============================>
     try:
-        worksheet = sht1.worksheet('20_URS_1')
+        worksheet = sht1.worksheet('30_URS_1')
     except gspread.exceptions.WorksheetNotFound:
-        worksheet = sht1.add_worksheet(title='20_URS_1', rows="115", cols="20")
+        worksheet = sht1.add_worksheet(title='30_URS_1', rows="115", cols="20")
 
     # Clear the worksheet
     worksheet.clear()
     
     # Update the Google Sheets worksheet
-    worksheet = sht1.worksheet('20_URS_1')
-    worksheet.update([new_df_step1.columns.values.tolist()] + new_df_step1.values.tolist())
+    worksheet = sht1.worksheet('30_URS_1')
+    worksheet.update([new_df_step2.columns.values.tolist()] + new_df_step2.values.tolist())
     formatting(worksheet)    
+    output_message = f"Trace Matrix successfully generated . <a href='{user_input}'>Click Here to view</a>"
 
     return output_message
 
@@ -290,7 +286,7 @@ async def post_data(request: Request,
     if Category == "RA":
         if one_master_sheet(gc,sp1,RA_Master_columns):
 
-            output_message = execute_RiskAnalysis(gc,sp1,FILE_ID,user_input,credentials,RA_Master_columns)
+            output_message = execute_RiskAnalysis(gc,sp1,FILE_ID,user_input,credentials)
             print(output_message)
             return output_message
         else:
@@ -300,14 +296,13 @@ async def post_data(request: Request,
     else :
         if one_master_sheet(gc,sp1,URS_Master_columns):
 
-            output_message = execute_RiskAnalysis(gc,sp1,FILE_ID,user_input,credentials,RA_Master_columns)
-            print(output_message)
-            return output_message
-        else:
             output_message = execute_URS(gc,sp1,FILE_ID,user_input,credentials)
             print(output_message)
             return output_message
-
+        else:
+            output_message = f"Check the sheet for correct format and check if the spreadsheet does not have only one 'Master' sheet. <a href='{user_input}'>Here</a>"
+            print(output_message)
+            
     print(output_message)
     
     return JSONResponse(content=output_message)
