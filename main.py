@@ -225,7 +225,7 @@ def execute_RiskAnalysis(gc,sht1,FILE_ID,user_input,credentials):
     rows = []
 
     for index, row in new_df_step4_rano_df.iterrows():
-        formatted_float_value = "{:.2f}".format(list_of_OQ[index])
+        formatted_float_value = "{:.1f}".format(list_of_OQ[index])
         new_row = {
             'Requirement from URS or RA': row['Requirement from URS or RA'],
             'URS Num': ' ',
